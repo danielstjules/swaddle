@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "standard && mocha"
+  },
+  "engines": {
+    "node": ">=6.4"
   },
   "repository": {
     "type": "git",
@@ -15,5 +18,17 @@
   "bugs": {
     "url": "https://github.com/danielstjules/swaddle/issues"
   },
-  "homepage": "https://github.com/danielstjules/swaddle#readme"
+  "homepage": "https://github.com/danielstjules/swaddle#readme",
+  "devDependencies": {
+    "got": "^6.7.1",
+    "mocha": "^3.3.0",
+    "nock": "^9.0.13",
+    "node-fetch": "^1.6.3",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.0",
+    "standard": "^10.0.2"
+  },
+  "dependencies": {
+    "extend": "^3.0.1"
+  }
 }
