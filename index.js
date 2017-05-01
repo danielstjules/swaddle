@@ -144,21 +144,17 @@ function getDefaultRequestFn (name) {
   }
 }
 
-module.exports = function swaddle (url) {
-  let args = [...arguments]
-  let opts, fn
+module.exports = function swaddle (url, opts = {}) {
+  opts = opts || {}
+  opts.fn = opts.fn || defaultRequestFn
 
-  if (args[1] instanceof Function) {
-    fn = args[1]
-  } else {
-    [opts, fn] = args.slice(1, 3)
+  if (!url) {
+    let err = new Error('swaddle requires an URL')
+    throw err
   }
 
-  opts = opts || {}
-  opts.fn = fn || defaultRequestFn
-
   if (!opts.fn) {
-    var err = new Error(`swaddle requires one of the following:
+    let err = new Error(`swaddle requires one of the following:
       * request is installed (npm install --save request)
       * got is installed (npm install --save got)
       * that fetch be available in the browser

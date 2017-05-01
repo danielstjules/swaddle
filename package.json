@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "standard && mocha"
+    "test": "standard --env mocha && mocha"
   },
   "engines": {
     "node": ">=6.4"
