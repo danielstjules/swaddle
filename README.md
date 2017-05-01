@@ -192,6 +192,10 @@ let api = swaddle('https://api.example.com', {
   extension: 'json'
 })
 
+api.users(1).get((err, res) => {
+  // https://api.example.com/users/1.json
+})
+
 api.search.get('?q=foo', (err, res) => {
   // https://api.example.com/search.json?q=foo
 })
@@ -208,7 +212,7 @@ var api = swaddle('https://api.example.com', {
   whitelist: ['users']
 });
 
-api.users().repos.get((err, res) => {
+api.users().get((err, res) => {
   // success
 });
 
