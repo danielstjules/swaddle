@@ -24,7 +24,8 @@ let repos = await api.users('danielstjules').repos.get()
 
 The library wraps an API, returning an object that builds the target URL with
 each property and invocation. It performs the request when an HTTP method is
-invoked.
+invoked. Properties reserved for HTTP methods include: get, post, put, patch,
+delete, head, and options.
 
 ``` javascript
 let swaddle = require('swaddle')
