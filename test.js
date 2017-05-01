@@ -1,4 +1,5 @@
 let assert = require('assert')
+let nock = require('nock')
 let swaddle = require('.')
 
 describe('swaddle', function () {
@@ -43,6 +44,23 @@ describe('swaddle', function () {
       let b = api.foo('bar').baz('qux')
       assert.equal(a._url, 'http://api/foo/bar')
       assert.equal(b._url, 'http://api/foo/bar/baz/qux')
+    })
+  })
+
+  describe('HTTP methods', function () {
+    let methods = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options']
+
+    methods.forEach((method) => {
+      it(`${method} performs a ${method.toUpperCase()} request`, function (done) {
+        nock(BASE_URL)
+          .intercept('/foo', method.toUpperCase())
+          .reply(200)
+
+        api.foo[method]((err, res) => {
+          assert(!err)
+          done()
+        })
+      })
     })
   })
 })

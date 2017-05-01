@@ -73,7 +73,7 @@ class Wrapper {
       args.unshift({})
     }
 
-    let opts = args[0] = extend(true, this._opts, args[0])
+    let opts = args[0] = extend(true, {}, this._opts, args[0])
     opts.method = method
 
     if (opts.extension) {
@@ -83,7 +83,7 @@ class Wrapper {
         url += `/${urlPart}.${opts.extension}`
       }
       delete opts.extension
-    } else {
+    } else if (urlPart != null) {
       url += `/${urlPart}`
     }
 
