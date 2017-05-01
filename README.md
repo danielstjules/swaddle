@@ -41,11 +41,11 @@ including:
 [`request-promise`](https://github.com/request-promise),
 [`got`](https://github.com/sindresorhus/got),
 [`whatwg-fetch`](https://github.com/github/fetch), and
-[`node-fetch`](https://github.com/bitinn/node-fetch), and
+[`node-fetch`](https://github.com/bitinn/node-fetch).
 
 None are installed as a dependency, giving you the freedom to pick your
-favorite. Unless provided, it will default to requiring `request`, `got`,
-or the browser's `fetch`, in that order.
+favorite. Unless provided, it will default to trying to require `request`,
+`got`, or the browser's `fetch`, in that order.
 
 ``` javascript
 let swaddle = require('swaddle')
@@ -123,7 +123,7 @@ api.search.repositories.get('?q=tetris', {
 All options are passed through to the underlying request function,
 except for those reserved by swaddle.
 
-#### fn
+### fn
 
 The request function to use. Unless provided, it will default to requiring
 `request`, `got`, or the browser's `fetch`, in that order.
@@ -136,7 +136,7 @@ let api = swaddle('https://api.example.com', {
 })
 ```
 
-#### returnBody
+### returnBody
 
 Returns the response body instead of response object.
 
@@ -151,7 +151,7 @@ api.users.get((err, res) => {
 })
 ```
 
-#### json
+### json
 
 Parses the JSON response. This is built into some libraries, but not all
 (e.g. fetch).
@@ -167,7 +167,7 @@ api.users.get((err, res) => {
 })
 ```
 
-#### extension
+### extension
 
 Allows you to specify an extension to be appended to any requests,
 required by some APIs.
@@ -183,7 +183,7 @@ api.search.get('?q=foo', (err, res) => {
 })
 ```
 
-#### whitelist
+### whitelist
 
 Whitelists properties that can be accessed. Required when polyfilling Proxy
 support for older browsers. Note that the exception is thrown during the
