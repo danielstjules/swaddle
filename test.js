@@ -68,6 +68,33 @@ describe('swaddle', function () {
   })
 
   describe('options', function () {
+    it('allows options to be set during creation', function (done) {
+      let fn = (url, opts) => {
+        assert.deepEqual(opts, {foo: 'bar', method: 'GET'})
+        done()
+      }
+      let api = swaddle(BASE_URL, {fn, foo: 'bar'})
+      api.foo.get()
+    })
+
+    it('allows options to be set during invocation', function (done) {
+      let fn = (url, opts) => {
+        assert.deepEqual(opts, {foo: 'bar', method: 'GET'})
+        done()
+      }
+      let api = swaddle(BASE_URL, {fn})
+      api.foo.get({foo: 'bar'})
+    })
+
+    it('merges properties from creation and invocation', function (done) {
+      let fn = (url, opts) => {
+        assert.deepEqual(opts, {a: 0, b: 2, c: 3, method: 'GET'})
+        done()
+      }
+      let api = swaddle(BASE_URL, {fn, a: 1, b: 2})
+      api.foo.get({a: 0, c: 3})
+    })
+
     describe('fn', function () {
       it('sets the request function to use', function (done) {
         let fn = () => done()

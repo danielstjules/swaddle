@@ -3,7 +3,7 @@
 Stop writing API clients/wrappers, use `swaddle` instead!
 
 ``` javascript
-let repos = await api.users('danielstjules').repos.get()
+let repos = await github.users('danielstjules').repos.get()
 // GET https://api.github.com/users/danielstjules/repos
 ```
 
@@ -29,29 +29,29 @@ delete, head, and options.
 
 ``` javascript
 let swaddle = require('swaddle')
-let api = swaddle('https://api.github.com', {
+let github = swaddle('https://api.github.com', {
   headers: {'User-Agent': 'request'}, // Required for GitHub API
   json: true, // Parses JSON response bodies
   returnBody: true // Returns the response body instead of response object
 })
 
-api.users.get('danielstjules', (err, user) => {
+github.users.get('danielstjules', (err, user) => {
   // GET https://api.github.com/users/danielstjules
   user.public_repos // 35
 })
 
-api.users('danielstjules').repos.get((err, repos) => {
+github.users('danielstjules').repos.get((err, repos) => {
   // GET https://api.github.com/users/danielstjules/repos
 })
 
-api.search.repositories.get('?q=tetris', (err, repos) => {
+github.search.repositories.get('?q=tetris', (err, repos) => {
   // GET https://api.github.com/search/repositories?q=tetris
 });
 
 // Identical operations, both perform
 // GET https://api.example.com/users/danielstjules
-api.users('danielstjules').get()
-api.users().get('danielstjules')
+github.users('danielstjules').get()
+github.users().get('danielstjules')
 ```
 
 The library is compatible with a range of HTTP request clients,
@@ -69,7 +69,7 @@ favorite. Unless provided, it will default to trying to require `request`,
 ``` javascript
 let swaddle = require('swaddle')
 let got = require('got')
-let api = swaddle('https://api.github.com', {
+let github = swaddle('https://api.github.com', {
   fn: got // Use `got` to perform requests
 })
 ```
@@ -99,18 +99,18 @@ This is because polyfills require that properties you want to proxy be known at
 creation time. In a browser with fetch, an example would then be:
 
 ``` javascript
-var api = swaddle('https://api.github.com', {
+var github = swaddle('https://api.github.com', {
   whitelist: ['users', 'repos'],
   returnBody: true,
   json: true
 });
 
 // Default to using fetch in the browser
-api.users('danielstjules').repos.get().then((repos) => {
+github.users('danielstjules').repos.get().then((repos) => {
   // repos
 });
 
-api.search
+github.search
 // Error: search not listed in swaddle's whitelist
 ```
 
@@ -120,7 +120,7 @@ Options are passed to the underlying request library in two ways. The first,
 is during initialization:
 
 ``` javascript
-let api = swaddle('https://api.example.com', {
+let client = swaddle('https://api.example.com', {
   auth: {
     user: 'username',
     pass: 'password',
@@ -134,8 +134,10 @@ requests to that API, unless otherwise overwritten. That is, in the following
 request, both basic auth and the custom User-Agent would be set:
 
 ``` javascript
-api.search.repositories.get('?q=tetris', {
+client.search.get('?q=foo', {
   headers: {'User-Agent': 'request'}
+}, (err, res) => {
+  // ...
 })
 ```
 
@@ -150,7 +152,7 @@ The request function to use. Unless provided, it will default to requiring
 ``` javascript
 let swaddle = require('swaddle')
 let request = require('request-promise')
-let api = swaddle('https://api.example.com', {
+let client = swaddle('https://api.example.com', {
   fn: request
 })
 ```
@@ -161,11 +163,11 @@ Returns the response body instead of response object.
 
 ``` javascript
 let swaddle = require('swaddle')
-let api = swaddle('https://api.example.com', {
+let client = swaddle('https://api.example.com', {
   returnBody: true
 })
 
-api.users.get((err, res) => {
+client.users.get((err, res) => {
   // Don't need to access res.body
 })
 ```
@@ -177,11 +179,11 @@ Parses the JSON response. This is built into some libraries, but not all
 
 ``` javascript
 let swaddle = require('swaddle')
-let api = swaddle('https://api.example.com', {
+let client = swaddle('https://api.example.com', {
   json: true
 })
 
-api.users.get((err, res) => {
+client.users.get((err, res) => {
   // res.body has been parsed
 })
 ```
@@ -193,15 +195,15 @@ required by some APIs.
 
 ```
 let swaddle = require('swaddle')
-let api = swaddle('https://api.example.com', {
+let client = swaddle('https://api.example.com', {
   extension: 'json'
 })
 
-api.users(1).get((err, res) => {
+client.users(1).get((err, res) => {
   // https://api.example.com/users/1.json
 })
 
-api.search.get('?q=foo', (err, res) => {
+client.search.get('?q=foo', (err, res) => {
   // https://api.example.com/search.json?q=foo
 })
 ```
@@ -213,14 +215,14 @@ support for older browsers. Note that the exception is thrown during the
 property access, and not during request execution.
 
 ``` javascript
-var api = swaddle('https://api.example.com', {
+var client = swaddle('https://api.example.com', {
   whitelist: ['users']
 });
 
-api.users().get((err, res) => {
+client.users().get((err, res) => {
   // success
 });
 
-api.search
+client.search
 // Error: search not listed in swaddle's whitelist
 ```
