@@ -77,7 +77,9 @@ class Wrapper {
     opts.method = method
 
     if (opts.extension) {
-      if (urlPart.indexOf('?') === 0) {
+      if (urlPart == null) {
+        url += `.${opts.extension}`
+      } else if (urlPart.indexOf('?') === 0) {
         url += `.${opts.extension}${urlPart}`
       } else {
         url += `/${urlPart}.${opts.extension}`

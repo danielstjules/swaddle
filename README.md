@@ -1,6 +1,6 @@
 # swaddle
 
-Stop writing API wrappers, use `swaddle` instead!
+Stop writing API clients/wrappers, use `swaddle` instead!
 
 ``` javascript
 let repos = await api.users('danielstjules').repos.get()
