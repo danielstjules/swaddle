@@ -47,6 +47,11 @@ api.users('danielstjules').repos.get((err, repos) => {
 api.search.repositories.get('?q=tetris', (err, repos) => {
   // GET https://api.github.com/search/repositories?q=tetris
 });
+
+// Identical operations, both perform
+// GET https://api.example.com/users/danielstjules
+api.users('danielstjules').get()
+api.users().get('danielstjules')
 ```
 
 The library is compatible with a range of HTTP request clients,
