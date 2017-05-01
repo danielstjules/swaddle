@@ -1,5 +1,8 @@
 let assert = require('assert')
 let nock = require('nock')
+let requestPromise = require('request-promise')
+let got = require('got')
+let fetch = require('node-fetch')
 let swaddle = require('.')
 
 describe('swaddle', function () {
@@ -143,9 +146,7 @@ describe('swaddle', function () {
     })
 
     describe('whitelist', function () {
-      let api = swaddle(BASE_URL, {
-        whitelist: ['foo', 'bar']
-      })
+      let api = swaddle(BASE_URL, {whitelist: ['foo', 'bar']})
 
       it('allows properties in the whitelist', function () {
         api.foo(1).bar(2)
@@ -155,6 +156,104 @@ describe('swaddle', function () {
         assert.throws(() => {
           api.foo(1).baz(2)
         }, Error)
+      })
+    })
+  })
+
+  describe('compatibility', function () {
+    let body = '{"foo": "bar"}'
+    let parsedBody = JSON.parse(body)
+
+    beforeEach(function () {
+      nock(BASE_URL)
+        .get('/foo/bar')
+        .reply(200, body)
+    })
+
+    describe('request-promise', function () {
+      it('performs the request', function () {
+        let api = swaddle(BASE_URL, {fn: requestPromise})
+        return api.foo.get('bar').then((res) => {
+          assert.equal(res, body)
+        })
+      })
+
+      it('returnBody is ignored by default', function () {
+        let api = swaddle(BASE_URL, {fn: requestPromise, returnBody: true})
+        return api.foo.get('bar').then((res) => {
+          assert.equal(res, body)
+        })
+      })
+
+      it('json parses the body', function () {
+        let api = swaddle(BASE_URL, {fn: requestPromise, json: true})
+        return api.foo.get('bar').then((res) => {
+          assert.deepEqual(res, parsedBody)
+        })
+      })
+    })
+
+    describe('got', function () {
+      it('performs the request', function () {
+        let api = swaddle(BASE_URL, {fn: got})
+        return api.foo.get('bar').then((res) => {
+          assert.equal(res.body, body)
+        })
+      })
+
+      it('returnBody returns the body', function () {
+        let api = swaddle(BASE_URL, {fn: got, returnBody: true})
+        return api.foo.get('bar').then((res) => {
+          assert.equal(res, body)
+        })
+      })
+
+      it('json parses the body', function () {
+        let api = swaddle(BASE_URL, {fn: got, json: true})
+        return api.foo.get('bar').then((res) => {
+          assert.deepEqual(res.body, parsedBody)
+        })
+      })
+
+      it('json and returnBody returns the parsed body', function () {
+        let api = swaddle(BASE_URL, {fn: got, json: true, returnBody: true})
+        return api.foo.get('bar').then((res) => {
+          assert.deepEqual(res, parsedBody)
+        })
+      })
+    })
+
+    describe('fetch', function () {
+      it('performs the request', function () {
+        let api = swaddle(BASE_URL, {fn: fetch})
+        return api.foo.get('bar').then((res) => {
+          return res.text()
+        }).then((res) => {
+          assert.equal(res, body)
+        })
+      })
+
+      it('returnBody returns the body', function () {
+        let api = swaddle(BASE_URL, {fn: fetch, returnBody: true})
+        return api.foo.get('bar').then((res) => {
+          assert.equal(res, body)
+        })
+      })
+
+      it('json is ignored, still need to use res.json()', function () {
+        let api = swaddle(BASE_URL, {fn: fetch, json: true})
+        return api.foo.get('bar').then((res) => {
+          return res.json()
+        }).then((res) => {
+          assert.deepEqual(res, parsedBody)
+        })
+      })
+
+      it('json and returnBody returns the parsed body', function () {
+        let api = swaddle(BASE_URL, {fn: fetch, json: true, returnBody: true})
+        return api.foo.get('bar').then((res) => {
+          assert.deepEqual(res, parsedBody)
+        })
       })
     })
   })
