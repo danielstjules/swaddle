@@ -5,7 +5,10 @@
   <br>
 </h1>
 
-Stop writing API clients/wrappers, use `swaddle` instead!
+Automagically generate API clients/wrappers in JavaScript. This is a great
+alternative for when client libraries don't already exist, and they can't be
+easily generated from a swagger API.
+
 
 ``` javascript
 let repos = await github.users('danielstjules').repos.get()
