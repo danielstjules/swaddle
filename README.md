@@ -7,6 +7,19 @@ let repos = await api.users('danielstjules').repos.get()
 // GET https://api.github.com/users/danielstjules/repos
 ```
 
+[![Build Status](https://travis-ci.org/danielstjules/swaddle.svg?branch=master)](https://travis-ci.org/danielstjules/swaddle)
+
+* [Overview](#overview)
+* [Installation](#installation)
+* [Node support](#node-support)
+* [Browser support](#browser-support)
+* [Options](#options)
+  * [fn](#fn)
+  * [returnBody](#returnBody)
+  * [json](#json)
+  * [extension](#extension)
+  * [whitelist](#whitelist)
+
 ## Overview
 
 The library wraps an API, returning an object that builds the target URL with
