@@ -1,6 +1,7 @@
 <h1 align="center">
-  <br>
   <img height="150" src="https://cloud.githubusercontent.com/assets/817212/25590381/5e0275c6-2e7e-11e7-9874-09e03071300b.png" alt="swaddle">
+  <br>
+  <br>
   <br>
 </h1>
 
