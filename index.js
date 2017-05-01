@@ -2,46 +2,46 @@ let extend = require('extend')
 let defaultRequestFn = getDefaultRequestFn()
 
 class Wrapper {
-  constructor (api, opts) {
-    this._api = api
+  constructor (client, opts) {
+    this._client = client
     this._opts = opts
   }
 
   static create (url, opts) {
-    let api = function () {}
+    let client = function () {}
     if (url.match(/\/$/)) {
       url = url.slice(0, -1)
     }
-    api._url = url
+    client._url = url
 
     if (opts.whitelist) {
       opts.whitelist.forEach((key) => {
-        api[key] = function () {}
+        client[key] = function () {}
       })
     }
 
-    let wrapper = new Wrapper(api, opts)
+    let wrapper = new Wrapper(client, opts)
 
     let methods = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options']
     methods.forEach((method) => {
-      api[method] = function () {
-        return wrapper._invokeMethod(api, method.toUpperCase(), [...arguments])
+      client[method] = function () {
+        return wrapper._invokeMethod(client, method.toUpperCase(), [...arguments])
       }
     })
 
-    return new Proxy(api, wrapper)
+    return new Proxy(client, wrapper)
   }
 
-  apply (api, context, args) {
-    // Handle invocations outside of an HTTP method, e.g. api.users(1)
-    let url = `${api._url}/${args[0]}`
+  apply (client, context, args) {
+    // Handle invocations outside of an HTTP method, e.g. client.users(1)
+    let url = `${client._url}/${args[0]}`
     return Wrapper.create(url, this._opts)
   }
 
-  get (api, name) {
+  get (client, name) {
     let whitelist = this._opts.whitelist
     let createUpdated = () => {
-      let url = `${api._url}/${name}`
+      let url = `${client._url}/${name}`
       return Wrapper.create(url, this._opts)
     }
 
@@ -50,18 +50,18 @@ class Wrapper {
       return true
     } else if (whitelist && whitelist.indexOf(name) !== -1) {
       return createUpdated()
-    } else if (name in api) {
-      return api[name]
+    } else if (name in client) {
+      return client[name]
     } else if (whitelist) {
       let err = new Error(`${name} not listed in swaddle's whitelist`)
       throw err
-    } else if (api === this._api) {
+    } else if (client === this._client) {
       return createUpdated()
     }
   }
 
-  _invokeMethod (api, method, args) {
-    let url = api._url
+  _invokeMethod (client, method, args) {
+    let url = client._url
     let urlPart
 
     if (this._isUrlPart(args[0])) {
