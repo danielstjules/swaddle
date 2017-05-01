@@ -16,7 +16,7 @@ class Wrapper {
 
     if (opts.whitelist) {
       opts.whitelist.forEach((key) => {
-        api[key] = function() {}
+        api[key] = function () {}
       })
     }
 
@@ -62,7 +62,7 @@ class Wrapper {
 
   _invokeMethod (api, method, args) {
     let url = api._url
-    let urlPart;
+    let urlPart
 
     if (this._isUrlPart(args[0])) {
       urlPart = args[0]
@@ -139,8 +139,8 @@ function getDefaultRequestFn (name) {
     }
   }
 
-  if (typeof fetch !== 'undefined') {
-    return fetch
+  if (typeof window.fetch !== 'undefined') {
+    return window.fetch
   }
 }
 
