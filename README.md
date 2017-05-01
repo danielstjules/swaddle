@@ -85,7 +85,7 @@ let github = swaddle('https://api.github.com', {
 ## Installation
 
 ``` bash
-npm install swaddle
+npm install --save swaddle
 npm install request # optional
 ```
 
