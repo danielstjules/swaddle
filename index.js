@@ -31,6 +31,13 @@ class Wrapper {
       }
     })
 
+    if (opts.aliases) {
+      Object.keys(opts.aliases).forEach((key) => {
+        let val = opts.aliases[key]
+        client[key] = client[val].bind(client)
+      })
+    }
+
     return new Proxy(client, wrapper)
   }
 
@@ -98,7 +105,8 @@ class Wrapper {
     let fn = opts.fn
     this._updateCamelCaseRequestBody(opts)
 
-    let keys = ['returnBody', 'fn', 'whitelist', 'camelCase', 'extension']
+    let keys = ['returnBody', 'fn', 'whitelist', 'camelCase',
+      'extension', 'aliases']
     keys.forEach((key) => delete opts[key])
 
     args.unshift(url)

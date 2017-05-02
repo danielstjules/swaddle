@@ -103,6 +103,17 @@ describe('swaddle', function () {
       client.foo.get({a: 0, c: 3})
     })
 
+    describe('aliases', function () {
+      it('sets aliases for the different client methods', function (done) {
+        let fn = (url, opts) => {
+          assert(opts.method, 'POST')
+          done()
+        }
+        let client = swaddle(BASE_URL, { fn, aliases: {create: 'post'} })
+        client.create()
+      })
+    })
+
     describe('fn', function () {
       it('sets the request function to use', function (done) {
         let fn = () => done()

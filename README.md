@@ -22,6 +22,7 @@ let repos = await github.users('danielstjules').repos.get()
 * [Node support](#node-support)
 * [Browser support](#browser-support)
 * [Options](#options)
+  * [aliases](#aliases)
   * [fn](#fn)
   * [returnBody](#returnbody)
   * [json](#json)
@@ -153,6 +154,23 @@ client.search.get('?q=foo', {
 
 All options are passed through to the underlying request function,
 except for those reserved by swaddle.
+
+### aliases
+
+Creates aliases for the supplied HTTP methods.
+
+``` javascript
+let swaddle = require('swaddle')
+let client = swaddle('https://api.example.com', {
+  aliases: {create: 'post', destroy: 'delete'}
+  json: true
+})
+
+client.threads.create({body: {subject: 'hi'}}, (err, res) => {
+  // POST https://api.example.com/threads
+  // body: '{"subject": "hi"}'
+})
+```
 
 ### fn
 
