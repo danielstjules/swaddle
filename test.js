@@ -60,7 +60,7 @@ describe('swaddle', function () {
           .reply(200)
 
         client.foo[method]((err, res) => {
-          assert(!err)
+          if (err) return done(err)
           done()
         })
       })
@@ -111,7 +111,7 @@ describe('swaddle', function () {
 
         let client = swaddle(BASE_URL, { returnBody: true })
         client.foo.get((err, res) => {
-          assert(!err)
+          if (err) return done(err)
           assert.equal(res, 'foo')
           done()
         })
@@ -122,12 +122,93 @@ describe('swaddle', function () {
       it('parses the JSON response', function (done) {
         nock(BASE_URL)
           .get('/foo')
-          .reply(200, '{"a": 1}')
+          .reply(200, '{"foo_bar": 1}')
 
         let client = swaddle(BASE_URL, { json: true })
         client.foo.get((err, res) => {
-          assert(!err)
-          assert.deepEqual(res.body, {a: 1})
+          if (err) return done(err)
+          assert.deepEqual(res.body, {foo_bar: 1})
+          done()
+        })
+      })
+    })
+
+    describe('camelCase', function () {
+      it('throws if json and returnBody are not set', function () {
+        assert.throws(() => {
+          swaddle(BASE_URL, { camelCase: true })
+        }, Error)
+      })
+
+      it('appends a snake_case string to the url', function () {
+        let client = swaddle(BASE_URL, {
+          json: true, returnBody: true, camelCase: true
+        })
+        assert.equal(client.fooBar._url, 'http://api/foo_bar')
+      })
+
+      it('does not affect strings added via invocation', function () {
+        let client = swaddle(BASE_URL, {
+          json: true, returnBody: true, camelCase: true
+        })
+        assert.equal(client.fooBar('bazQux')._url, 'http://api/foo_bar/bazQux')
+      })
+
+      it('converts snake_case response keys to camelCase', function (done) {
+        nock(BASE_URL)
+          .get('/foo')
+          .reply(200, '{"foo_bar": "not_changed", "baz": {"foo_bar": true}}')
+
+        let client = swaddle(BASE_URL, {
+          json: true, returnBody: true, camelCase: true
+        })
+
+        client.foo.get((err, res) => {
+          if (err) return done(err)
+          assert.deepEqual(res, {
+            fooBar: 'not_changed',
+            baz: {fooBar: true}
+          })
+          done()
+        })
+      })
+
+      it('converts camelCase keys in body object to snake_case', function (done) {
+        nock(BASE_URL)
+          .post('/foo', {
+            foo_bar: 'notChanged',
+            baz: {foo_bar: true}
+          })
+          .reply(200)
+
+        let client = swaddle(BASE_URL, {
+          json: true, returnBody: true, camelCase: true
+        })
+
+        client.foo.post({
+          body: {fooBar: 'notChanged', baz: {fooBar: true}}
+        }, (err, res) => {
+          if (err) return done(err)
+          done()
+        })
+      })
+
+      it('converts camelCase keys in json object to snake_case', function (done) {
+        nock(BASE_URL)
+          .post('/foo', {
+            foo_bar: 'notChanged',
+            baz: {foo_bar: true}
+          })
+          .reply(200)
+
+        let client = swaddle(BASE_URL, {
+          json: true, returnBody: true, camelCase: true
+        })
+
+        client.foo.post({
+          json: {fooBar: 'notChanged', baz: {fooBar: true}}
+        }, (err, res) => {
+          if (err) return done(err)
           done()
         })
       })
@@ -141,7 +222,7 @@ describe('swaddle', function () {
 
         let client = swaddle(BASE_URL, { extension: 'json' })
         client.foo.get((err, res) => {
-          assert(!err)
+          if (err) return done(err)
           done()
         })
       })
@@ -153,7 +234,7 @@ describe('swaddle', function () {
 
         let client = swaddle(BASE_URL, { extension: 'json' })
         client.get('foo', (err, res) => {
-          assert(!err)
+          if (err) return done(err)
           done()
         })
       })
@@ -166,7 +247,7 @@ describe('swaddle', function () {
 
         let client = swaddle(BASE_URL, { extension: 'json' })
         client.search.get('?q=foo', (err, res) => {
-          assert(!err)
+          if (err) return done(err)
           done()
         })
       })

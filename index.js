@@ -1,5 +1,7 @@
 let extend = require('extend')
 let defaultRequestFn = getDefaultRequestFn()
+let camelize = require('underscore.string/camelize')
+let underscored = require('underscore.string/underscored')
 
 class Wrapper {
   constructor (client, opts) {
@@ -45,6 +47,10 @@ class Wrapper {
       return Wrapper.create(url, this._opts)
     }
 
+    if (typeof name === 'string' && this._opts.camelCase) {
+      name = underscored(name)
+    }
+
     if (typeof name === 'symbol') {
       // Likely inspecting the object in node where showProxy is false
       return true
@@ -84,16 +90,16 @@ class Wrapper {
       } else {
         url += `/${urlPart}.${opts.extension}`
       }
-      delete opts.extension
     } else if (urlPart != null) {
       url += `/${urlPart}`
     }
 
     let returnBody = opts.returnBody
     let fn = opts.fn
-    delete opts.returnBody
-    delete opts.fn
-    delete opts.whitelist
+    this._updateCamelCaseRequestBody(opts)
+
+    let keys = ['returnBody', 'fn', 'whitelist', 'camelCase', 'extension']
+    keys.forEach((key) => delete opts[key])
 
     args.unshift(url)
 
@@ -115,19 +121,68 @@ class Wrapper {
     return x != null && (!!x.substring || !!x.toFixed)
   }
 
+  _updateCamelCaseRequestBody (opts) {
+    if (!opts.camelCase) return
+
+    if (opts.body instanceof Object) {
+      // TODO: Might need to stringify for got/fetch, but not request
+      // opts.body = JSON.stringify(this._convertToSnakeCase(opts.body))
+      // content-type needs to be set to json when using body
+      opts.body = this._convertToSnakeCase(opts.body)
+      opts.headers = opts.headers || {}
+      opts.headers['content-type'] = 'application/json'
+    } else if (opts.json instanceof Object) {
+      // request sets content-type to json when opts.json is an object
+      opts.json = this._convertToSnakeCase(opts.json)
+    }
+  }
+
   _getBody (res, json) {
+    if (!res) return
+
+    // Optionally normalize object keys
+    let normalize = (res) => {
+      return (this._opts.camelCase) ? this._convertToCamelCase(res) : res
+    }
+
     // Handle whatwg spec fetch
     if (typeof res.json === 'function') {
-      return json ? res.json() : res.text()
+      return json ? res.json().then(normalize) : res.text()
     }
 
     // Other request libraries, which serialize JSON automatically
-    return this._isResponseObject(res) ? res.body : res
+    let body = this._isResponseObject(res) ? res.body : res
+    return normalize(body)
   }
 
   _isResponseObject (res) {
     let type = res.constructor.name
     return type === 'IncomingMessage' || type.indexOf('Response') !== -1
+  }
+
+  _convertToCamelCase (obj) {
+    return this._convertCase(obj, camelize)
+  }
+
+  _convertToSnakeCase (obj) {
+    return this._convertCase(obj, underscored)
+  }
+
+  _convertCase (obj, fn) {
+    if (!(obj instanceof Object)) {
+      return obj
+    }
+
+    Object.keys(obj).forEach((key) => {
+      let updated = fn(key)
+      if (updated !== key) {
+        obj[updated] = obj[key]
+        delete obj[key]
+      }
+      this._convertCase(obj[updated], fn)
+    })
+
+    return obj
   }
 }
 
@@ -152,6 +207,11 @@ module.exports = function swaddle (url, opts = {}) {
 
   if (!url) {
     let err = new Error('swaddle requires an URL')
+    throw err
+  }
+
+  if (opts.camelCase && !opts.returnBody && !opts.json) {
+    let err = new Error('camelCase must be used with returnBody and json')
     throw err
   }
 

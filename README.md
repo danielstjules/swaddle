@@ -25,6 +25,7 @@ let repos = await github.users('danielstjules').repos.get()
   * [fn](#fn)
   * [returnBody](#returnbody)
   * [json](#json)
+  * [camelCase](#camelcase)
   * [extension](#extension)
   * [whitelist](#whitelist)
 
@@ -40,12 +41,13 @@ let swaddle = require('swaddle')
 let github = swaddle('https://api.github.com', {
   headers: {'User-Agent': 'request'}, // Required for GitHub API
   json: true, // Parses JSON response bodies
-  returnBody: true // Returns the response body instead of response object
+  returnBody: true, // Returns the response body instead of response object
+  camelCase: true // Create a camelCase client for a snake_case JSON API
 })
 
 github.users.get('danielstjules', (err, user) => {
   // GET https://api.github.com/users/danielstjules
-  user.public_repos // 35
+  user.publicRepos // camelCase option renames user.public_repos
 })
 
 github.users('danielstjules').repos.get((err, repos) => {
@@ -195,6 +197,11 @@ client.users.get((err, res) => {
   // res.body has been parsed
 })
 ```
+
+### camelCase
+
+Create a camelCase client for a snake_case JSON API. Only available when both
+returnBody and json are set to true.
 
 ### extension
 
