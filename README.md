@@ -203,8 +203,7 @@ client.users.get((err, res) => {
 Creates a camelCase client for a snake_case JSON API. Only available when both
 returnBody and json are set to true. Camel case properties are appended as
 snake case to the resulting url. Arguments passed during function invocation
-are unaffected. Any objects passed in the request body are recursively
-formatted.
+are unaffected. Any objects request or response body are recursively formatted.
 
 ``` javascript
 let client = swaddle('https://api.example.com', {
@@ -219,6 +218,11 @@ client.jobStatuses.get((err, res) => {
 
 client.fooBar('bazQux').get((err, res) => {
   // GET http://api/foo_bar/bazQux
+})
+
+client.users(1).get((err, res) => {
+  // If the original response body was '{"is_admin": false}', then res is
+  // {isAdmin: false}
 })
 
 client.users.post({body: {isAdmin: false, name: 'Foo Bar'}}, (err, res) => {
