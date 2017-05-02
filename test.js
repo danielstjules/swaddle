@@ -8,6 +8,14 @@ let swaddle = require('.')
 describe('swaddle', function () {
   let BASE_URL = 'http://api'
   let client = swaddle(BASE_URL)
+  let snakeCaseObj = {
+    foo_bar: 'notChanged',
+    baz: {foo_bar: true}
+  }
+  let camelCaseObj = {
+    fooBar: 'notChanged',
+    baz: {fooBar: true}
+  }
 
   describe('url', function () {
     it('throws if missing the base url', function () {
@@ -175,19 +183,14 @@ describe('swaddle', function () {
 
       it('converts camelCase keys in body object to snake_case', function (done) {
         nock(BASE_URL)
-          .post('/foo', {
-            foo_bar: 'notChanged',
-            baz: {foo_bar: true}
-          })
+          .post('/foo', snakeCaseObj)
           .reply(200)
 
         let client = swaddle(BASE_URL, {
           json: true, returnBody: true, camelCase: true
         })
 
-        client.foo.post({
-          body: {fooBar: 'notChanged', baz: {fooBar: true}}
-        }, (err, res) => {
+        client.foo.post({body: camelCaseObj}, (err, res) => {
           if (err) return done(err)
           done()
         })
@@ -195,19 +198,14 @@ describe('swaddle', function () {
 
       it('converts camelCase keys in json object to snake_case', function (done) {
         nock(BASE_URL)
-          .post('/foo', {
-            foo_bar: 'notChanged',
-            baz: {foo_bar: true}
-          })
+          .post('/foo', snakeCaseObj)
           .reply(200)
 
         let client = swaddle(BASE_URL, {
           json: true, returnBody: true, camelCase: true
         })
 
-        client.foo.post({
-          json: {fooBar: 'notChanged', baz: {fooBar: true}}
-        }, (err, res) => {
+        client.foo.post({json: camelCaseObj}, (err, res) => {
           if (err) return done(err)
           done()
         })
@@ -299,6 +297,18 @@ describe('swaddle', function () {
           assert.deepEqual(res, parsedBody)
         })
       })
+
+      it('camelCase converts keys in json object', function () {
+        nock(BASE_URL)
+          .post('/foo', snakeCaseObj)
+          .reply(200)
+
+        let client = swaddle(BASE_URL, {
+          json: true, returnBody: true, camelCase: true, fn: requestPromise
+        })
+
+        return client.foo.post({json: camelCaseObj})
+      })
     })
 
     describe('got', function () {
@@ -328,6 +338,18 @@ describe('swaddle', function () {
         return client.foo.get('bar').then((res) => {
           assert.deepEqual(res, parsedBody)
         })
+      })
+
+      it('camelCase converts keys in body object', function () {
+        nock(BASE_URL)
+          .post('/foo', snakeCaseObj)
+          .reply(200)
+
+        let client = swaddle(BASE_URL, {
+          json: true, returnBody: true, camelCase: true, fn: got
+        })
+
+        return client.foo.post({body: camelCaseObj})
       })
     })
 

@@ -124,17 +124,20 @@ class Wrapper {
   _updateCamelCaseRequestBody (opts) {
     if (!opts.camelCase) return
 
-    if (opts.body instanceof Object) {
-      // TODO: Might need to stringify for got/fetch, but not request
-      // opts.body = JSON.stringify(this._convertToSnakeCase(opts.body))
-      // content-type needs to be set to json when using body
-      opts.body = this._convertToSnakeCase(opts.body)
-      opts.headers = opts.headers || {}
-      opts.headers['content-type'] = 'application/json'
-    } else if (opts.json instanceof Object) {
+    if (opts.json instanceof Object) {
       // request sets content-type to json when opts.json is an object
       opts.json = this._convertToSnakeCase(opts.json)
+      return
     }
+
+    opts.body = this._convertToSnakeCase(opts.body)
+    if (opts.fn.name !== 'request') {
+      // Need to stringify for got/fetch
+      opts.body = JSON.stringify(opts.body)
+    }
+    opts.headers = opts.headers || {}
+    // content-type needs to be set to json when using body
+    opts.headers['content-type'] = 'application/json'
   }
 
   _getBody (res, json) {
