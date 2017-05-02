@@ -148,9 +148,13 @@ class Wrapper {
       return (this._opts.camelCase) ? this._convertToCamelCase(res) : res
     }
 
-    // Handle whatwg spec fetch
-    if (typeof res.json === 'function') {
-      return json ? res.json().then(normalize) : res.text()
+    // Handle whatwg spec fetch. Note that empty response body will cause
+    // res.json() to throw, so use res.text() instead
+    if (typeof res.text === 'function') {
+      if (!json) return res.text()
+      return res.text().then((res) => {
+        return res ? normalize(JSON.parse(res)) : res
+      })
     }
 
     // Other request libraries, which serialize JSON automatically

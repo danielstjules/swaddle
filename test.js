@@ -385,6 +385,18 @@ describe('swaddle', function () {
           assert.deepEqual(res, parsedBody)
         })
       })
+
+      it('camelCase converts keys in body object', function () {
+        nock(BASE_URL)
+          .post('/foo', snakeCaseObj)
+          .reply(200)
+
+        let client = swaddle(BASE_URL, {
+          json: true, returnBody: true, camelCase: true, fn: fetch
+        })
+
+        return client.foo.post({body: camelCaseObj})
+      })
     })
   })
 })
