@@ -200,15 +200,39 @@ client.users.get((err, res) => {
 
 ### camelCase
 
-Create a camelCase client for a snake_case JSON API. Only available when both
-returnBody and json are set to true.
+Creates a camelCase client for a snake_case JSON API. Only available when both
+returnBody and json are set to true. Camel case properties are appended as
+snake case to the resulting url. Arguments passed during function invocation
+are unaffected. Any objects passed in the request body are recursively
+formatted.
+
+``` javascript
+let client = swaddle('https://api.example.com', {
+  json: true,
+  returnBody: true,
+  camelCase: true
+})
+
+client.jobStatuses.get((err, res) => {
+  // GET http://api/job_statuses
+})
+
+client.fooBar('bazQux').get((err, res) => {
+  // GET http://api/foo_bar/bazQux
+})
+
+client.users.post({body: {isAdmin: false, name: 'Foo Bar'}}, (err, res) => {
+  // POST http://api/users
+  // body: '{"is_admin": false, "name": "Foo Bar"}'
+})
+```
 
 ### extension
 
 Allows you to specify an extension to be appended to any requests,
 required by some APIs.
 
-```
+``` javascript
 let swaddle = require('swaddle')
 let client = swaddle('https://api.example.com', {
   extension: 'json'
