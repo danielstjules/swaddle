@@ -200,6 +200,28 @@ client.users.get((err, res) => {
 })
 ```
 
+### sendAsBody
+
+Any literal or object passed to post, put, or patch, is set as the request body.
+Thus no additional headers or options can be set at the time of the request.
+Combined with aliases, it can prevent an otherwise leaky HTTP abstraction.
+
+``` javascript
+let swaddle = require('swaddle')
+let client = swaddle('https://api.example.com', {
+  aliases: {create: 'post'},
+  sendAsBody: true
+})
+
+// Don't need to write:
+// client.messages.post({body: 'foo'})
+
+client.messages.create('foo', (err, res) => {
+  // POST https://api.example.com/messages
+  // body: "foo"
+})
+```
+
 ### json
 
 Parses the JSON response. This is built into some libraries, but not all

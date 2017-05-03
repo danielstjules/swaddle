@@ -137,6 +137,20 @@ describe('swaddle', function () {
       })
     })
 
+    describe('sendAsBody', function () {
+      it('nests the post data in the req.body', function (done) {
+        nock(BASE_URL)
+          .post('/foo', 'bar')
+          .reply(200)
+
+        let client = swaddle(BASE_URL, {sendAsBody: true})
+        client.foo.post('bar', (err, res) => {
+          if (err) return done(err)
+          done()
+        })
+      })
+    })
+
     describe('json', function () {
       it('parses the JSON response', function (done) {
         nock(BASE_URL)

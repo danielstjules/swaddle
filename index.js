@@ -77,7 +77,9 @@ class Wrapper {
     let url = client._url
     let urlPart
 
-    if (this._isUrlPart(args[0])) {
+    if (this._shouldWrapInBody(method, args)) {
+      args[0] = {body: args[0]}
+    } else if (this._isUrlPart(args[0])) {
       urlPart = args[0]
       args.shift()
     }
@@ -106,7 +108,7 @@ class Wrapper {
     this._updateCamelCaseRequestBody(opts)
 
     let keys = ['returnBody', 'fn', 'whitelist', 'camelCase',
-      'extension', 'aliases']
+      'extension', 'aliases', 'sendAsBody']
     keys.forEach((key) => delete opts[key])
 
     args.unshift(url)
@@ -127,6 +129,13 @@ class Wrapper {
 
   _isUrlPart (x) {
     return x != null && (!!x.substring || !!x.toFixed)
+  }
+
+  _shouldWrapInBody(method, args) {
+    let methods = ['POST', 'PUT', 'PATCH']
+
+    return args.length && this._opts.sendAsBody &&
+      typeof args[0] !== 'function' && methods.indexOf(method) !== -1
   }
 
   _updateCamelCaseRequestBody (opts) {
