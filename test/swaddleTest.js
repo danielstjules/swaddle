@@ -84,7 +84,7 @@ describe('swaddle', function () {
     it('has a default user agent and json set to true', function (done) {
       let fn = (url, opts) => {
         assert.deepEqual(opts, {
-          headers: {'User-Agent': 'fn'},
+          headers: {'User-Agent': 'swaddle'},
           json: true,
           method: 'GET'
         })
@@ -97,7 +97,7 @@ describe('swaddle', function () {
     it('allows options to be set during creation', function (done) {
       let fn = (url, opts) => {
         assert.deepEqual(opts, {
-          headers: {'User-Agent': 'fn'},
+          headers: {'User-Agent': 'swaddle'},
           json: true,
           method: 'GET',
           foo: 'bar'
@@ -111,7 +111,7 @@ describe('swaddle', function () {
     it('allows options to be set during invocation', function (done) {
       let fn = (url, opts) => {
         assert.deepEqual(opts, {
-          headers: {'User-Agent': 'fn'},
+          headers: {'User-Agent': 'swaddle'},
           json: true,
           method: 'GET',
           foo: 'bar'
@@ -125,7 +125,7 @@ describe('swaddle', function () {
     it('merges properties from creation and invocation', function (done) {
       let fn = (url, opts) => {
         assert.deepEqual(opts, {
-          headers: {'User-Agent': 'fn'},
+          headers: {'User-Agent': 'swaddle'},
           json: true,
           method: 'GET',
           a: 0,
