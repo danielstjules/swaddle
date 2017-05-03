@@ -131,7 +131,7 @@ class Wrapper {
     return x != null && (!!x.substring || !!x.toFixed)
   }
 
-  _shouldWrapInBody(method, args) {
+  _shouldWrapInBody (method, args) {
     let methods = ['POST', 'PUT', 'PATCH']
 
     return args.length && this._opts.sendAsBody &&
