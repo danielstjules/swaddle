@@ -38,18 +38,19 @@ each property and invocation. It performs the request when an HTTP method is
 invoked. Properties reserved for HTTP methods include: get, post, put, patch,
 delete, head, and options.
 
+The library also comes with some sane defaults for JSON APIs. Two options are
+set to true by default: json and returnBody. JSON response bodies are parsed,
+and the response body itself is returned instead of the response object.
+In the example below, we also make use of the camelCase option, which creates
+a camelCase client for a snake_case JSON API.
+
 ``` javascript
 let swaddle = require('swaddle')
-let github = swaddle('https://api.github.com', {
-  headers: {'User-Agent': 'request'}, // Required for GitHub API
-  json: true, // Parses JSON response bodies
-  returnBody: true, // Returns the response body instead of response object
-  camelCase: true // Create a camelCase client for a snake_case JSON API
-})
+let github = swaddle('https://api.github.com', {camelCase: true})
 
 github.users.get('octocat', (err, user) => {
   // GET https://api.github.com/users/octocat
-  user.publicRepos // camelCase option renames user.public_repos
+  user.publicRepos // instead of user.public_repos
 })
 
 github.users('octocat').repos.get((err, repos) => {
@@ -114,11 +115,11 @@ let client = swaddle('https://api.example.com', {
 
 Any options set during initialization will be stored and inherited by all
 requests to that API, unless otherwise overwritten. That is, in the following
-request, both basic auth and the custom User-Agent would be set:
+request, both basic auth and the custom header would be set:
 
 ``` javascript
 client.search.get('?q=foo', {
-  headers: {'User-Agent': 'request'}
+  headers: {'x-custom-header': 'value'}
 }, (err, res) => {
   // ...
 })
@@ -129,7 +130,7 @@ except for those reserved by swaddle.
 
 ### aliases
 
-Creates aliases for the supplied HTTP methods.
+Creates aliases for the supplied HTTP methods. Default: none
 
 ``` javascript
 let swaddle = require('swaddle')
@@ -159,16 +160,19 @@ let client = swaddle('https://api.example.com', {
 
 ### returnBody
 
-Returns the response body instead of response object.
+Returns the response body instead of response object. Default: true
 
 ``` javascript
 let swaddle = require('swaddle')
-let client = swaddle('https://api.example.com', {
-  returnBody: true
-})
 
+let client = swaddle('https://api.example.com')
 client.users.get((err, res) => {
   // Don't need to access res.body
+})
+
+client = swaddle('https://api.example.com', {returnBody: false})
+client.users.get((err, res) => {
+  // Need to access res.body
 })
 ```
 
@@ -177,6 +181,7 @@ client.users.get((err, res) => {
 Any literal or object passed to post, put, or patch, is set as the request body.
 Thus no additional headers or options can be set at the time of the request.
 Combined with aliases, it can prevent an otherwise leaky HTTP abstraction.
+Default: false
 
 ``` javascript
 let swaddle = require('swaddle')
@@ -197,16 +202,19 @@ client.messages.create('foo', (err, res) => {
 ### json
 
 Parses the JSON response. This is built into some libraries, but not all
-(e.g. fetch).
+(e.g. fetch). Default: true
 
 ``` javascript
 let swaddle = require('swaddle')
-let client = swaddle('https://api.example.com', {
-  json: true
-})
 
+let client = swaddle('https://api.example.com')
 client.users.get((err, res) => {
   // res.body has been parsed
+})
+
+client = swaddle('https://api.example.com', {json: false})
+client.users.get((err, res) => {
+  // res.body is a string response
 })
 ```
 
@@ -216,13 +224,10 @@ Creates a camelCase client for a snake_case JSON API. Only available when both
 returnBody and json are set to true. Camel case properties are appended as
 snake case to the resulting url. Arguments passed during function invocation
 are unaffected. Any objects request or response body are recursively formatted.
+Default: false
 
 ``` javascript
-let client = swaddle('https://api.example.com', {
-  json: true,
-  returnBody: true,
-  camelCase: true
-})
+let client = swaddle('https://api.example.com')
 
 client.jobStatuses.get((err, res) => {
   // GET http://api/job_statuses
@@ -246,7 +251,7 @@ client.users.post({body: {isAdmin: false, name: 'Foo Bar'}}, (err, res) => {
 ### extension
 
 Allows you to specify an extension to be appended to any requests,
-required by some APIs.
+required by some APIs. Default: empty
 
 ``` javascript
 let swaddle = require('swaddle')
@@ -267,7 +272,7 @@ client.search.get('?q=foo', (err, res) => {
 
 Whitelists properties that can be accessed. Required when polyfilling Proxy
 support for older browsers. Note that the exception is thrown during the
-property access, and not during request execution.
+property access, and not during request execution. Default: empty
 
 ``` javascript
 var client = swaddle('https://api.example.com', {
@@ -301,9 +306,7 @@ creation time. In a browser with fetch, an example would then be:
 
 ``` javascript
 var github = swaddle('https://api.github.com', {
-  whitelist: ['users', 'repos'],
-  returnBody: true,
-  json: true
+  whitelist: ['users', 'repos']
 });
 
 // Default to using fetch in the browser

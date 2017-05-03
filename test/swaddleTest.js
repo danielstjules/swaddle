@@ -81,9 +81,27 @@ describe('swaddle', function () {
   })
 
   describe('options', function () {
+    it('has a default user agent and json set to true', function (done) {
+      let fn = (url, opts) => {
+        assert.deepEqual(opts, {
+          headers: {'User-Agent': 'fn'},
+          json: true,
+          method: 'GET'
+        })
+        done()
+      }
+      let client = swaddle(BASE_URL, {fn})
+      client.foo.get()
+    })
+
     it('allows options to be set during creation', function (done) {
       let fn = (url, opts) => {
-        assert.deepEqual(opts, {foo: 'bar', method: 'GET'})
+        assert.deepEqual(opts, {
+          headers: {'User-Agent': 'fn'},
+          json: true,
+          method: 'GET',
+          foo: 'bar'
+        })
         done()
       }
       let client = swaddle(BASE_URL, {fn, foo: 'bar'})
@@ -92,7 +110,12 @@ describe('swaddle', function () {
 
     it('allows options to be set during invocation', function (done) {
       let fn = (url, opts) => {
-        assert.deepEqual(opts, {foo: 'bar', method: 'GET'})
+        assert.deepEqual(opts, {
+          headers: {'User-Agent': 'fn'},
+          json: true,
+          method: 'GET',
+          foo: 'bar'
+        })
         done()
       }
       let client = swaddle(BASE_URL, {fn})
@@ -101,7 +124,14 @@ describe('swaddle', function () {
 
     it('merges properties from creation and invocation', function (done) {
       let fn = (url, opts) => {
-        assert.deepEqual(opts, {a: 0, b: 2, c: 3, method: 'GET'})
+        assert.deepEqual(opts, {
+          headers: {'User-Agent': 'fn'},
+          json: true,
+          method: 'GET',
+          a: 0,
+          b: 2,
+          c: 3
+        })
         done()
       }
       let client = swaddle(BASE_URL, {fn, a: 1, b: 2})
@@ -114,7 +144,7 @@ describe('swaddle', function () {
           assert(opts.method, 'POST')
           done()
         }
-        let client = swaddle(BASE_URL, { fn, aliases: {create: 'post'} })
+        let client = swaddle(BASE_URL, {fn, aliases: {create: 'post'}})
         client.create()
       })
     })
@@ -122,21 +152,34 @@ describe('swaddle', function () {
     describe('fn', function () {
       it('sets the request function to use', function (done) {
         let fn = () => done()
-        let client = swaddle(BASE_URL, { fn })
+        let client = swaddle(BASE_URL, {fn})
         client.foo.get()
       })
     })
 
     describe('returnBody', function () {
-      it('returns the response body', function (done) {
+      it('returns the response body when true', function (done) {
         nock(BASE_URL)
           .get('/foo')
           .reply(200, 'foo')
 
-        let client = swaddle(BASE_URL, { returnBody: true })
+        let client = swaddle(BASE_URL)
         client.foo.get((err, res) => {
           if (err) return done(err)
           assert.equal(res, 'foo')
+          done()
+        })
+      })
+
+      it('returns the full response when false', function (done) {
+        nock(BASE_URL)
+          .get('/foo')
+          .reply(200, 'foo')
+
+        let client = swaddle(BASE_URL, {returnBody: false})
+        client.foo.get((err, res) => {
+          if (err) return done(err)
+          assert.equal(res.body, 'foo')
           done()
         })
       })
@@ -145,7 +188,7 @@ describe('swaddle', function () {
     describe('sendAsBody', function () {
       it('nests the post data in the req.body', function (done) {
         nock(BASE_URL)
-          .post('/foo', 'bar')
+          .post('/foo', '"bar"')
           .reply(200)
 
         let client = swaddle(BASE_URL, {sendAsBody: true})
@@ -157,38 +200,53 @@ describe('swaddle', function () {
     })
 
     describe('json', function () {
-      it('parses the JSON response', function (done) {
+      it('parses the JSON response when true', function (done) {
         nock(BASE_URL)
           .get('/foo')
           .reply(200, '{"foo_bar": 1}')
 
-        let client = swaddle(BASE_URL, { json: true })
         client.foo.get((err, res) => {
           if (err) return done(err)
-          assert.deepEqual(res.body, {foo_bar: 1})
+          assert.deepEqual(res, {foo_bar: 1})
+          done()
+        })
+      })
+
+      it('does not parse the JSON response when false', function (done) {
+        var str = '{"foo_bar": 1}'
+        nock(BASE_URL)
+          .get('/foo')
+          .reply(200, str)
+
+        let client = swaddle(BASE_URL, {json: false})
+        client.foo.get((err, res) => {
+          if (err) return done(err)
+          assert.equal(res, str)
           done()
         })
       })
     })
 
     describe('camelCase', function () {
+      let client = swaddle(BASE_URL, {camelCase: true})
+
       it('throws if json and returnBody are not set', function () {
         assert.throws(() => {
-          swaddle(BASE_URL, { camelCase: true })
+          swaddle(BASE_URL, {camelCase: true, json: false, returnBody: false})
+        }, Error)
+        assert.throws(() => {
+          swaddle(BASE_URL, {camelCase: true, json: false})
+        }, Error)
+        assert.throws(() => {
+          swaddle(BASE_URL, {camelCase: true, returnBody: false})
         }, Error)
       })
 
       it('appends a snake_case string to the url', function () {
-        let client = swaddle(BASE_URL, {
-          json: true, returnBody: true, camelCase: true
-        })
         assert.equal(client.fooBar._url, 'http://api/foo_bar')
       })
 
       it('does not affect strings added via invocation', function () {
-        let client = swaddle(BASE_URL, {
-          json: true, returnBody: true, camelCase: true
-        })
         assert.equal(client.fooBar('bazQux')._url, 'http://api/foo_bar/bazQux')
       })
 
@@ -196,10 +254,6 @@ describe('swaddle', function () {
         nock(BASE_URL)
           .get('/foo')
           .reply(200, '{"foo_bar": "not_changed", "baz": {"foo_bar": true}}')
-
-        let client = swaddle(BASE_URL, {
-          json: true, returnBody: true, camelCase: true
-        })
 
         client.foo.get((err, res) => {
           if (err) return done(err)
@@ -216,10 +270,6 @@ describe('swaddle', function () {
           .post('/foo', snakeCaseObj)
           .reply(200)
 
-        let client = swaddle(BASE_URL, {
-          json: true, returnBody: true, camelCase: true
-        })
-
         client.foo.post({body: camelCaseObj}, (err, res) => {
           if (err) return done(err)
           done()
@@ -231,10 +281,6 @@ describe('swaddle', function () {
           .post('/foo', snakeCaseObj)
           .reply(200)
 
-        let client = swaddle(BASE_URL, {
-          json: true, returnBody: true, camelCase: true
-        })
-
         client.foo.post({json: camelCaseObj}, (err, res) => {
           if (err) return done(err)
           done()
@@ -245,10 +291,6 @@ describe('swaddle', function () {
         nock(BASE_URL)
           .post('/foo', snakeCaseObj)
           .reply(200)
-
-        let client = swaddle(BASE_URL, {
-          json: true, returnBody: true, camelCase: true
-        })
 
         client.foo.post({json: camelCaseObj}, (err, res) => {
           if (err) return done(err)
@@ -264,7 +306,7 @@ describe('swaddle', function () {
           .get('/foo.json')
           .reply(200)
 
-        let client = swaddle(BASE_URL, { extension: 'json' })
+        let client = swaddle(BASE_URL, {extension: 'json'})
         client.foo.get((err, res) => {
           if (err) return done(err)
           done()
@@ -276,7 +318,7 @@ describe('swaddle', function () {
           .get('/foo.json')
           .reply(200)
 
-        let client = swaddle(BASE_URL, { extension: 'json' })
+        let client = swaddle(BASE_URL, {extension: 'json'})
         client.get('foo', (err, res) => {
           if (err) return done(err)
           done()
@@ -289,7 +331,7 @@ describe('swaddle', function () {
           .query({q: 'foo'})
           .reply(200)
 
-        let client = swaddle(BASE_URL, { extension: 'json' })
+        let client = swaddle(BASE_URL, {extension: 'json'})
         client.search.get('?q=foo', (err, res) => {
           if (err) return done(err)
           done()
@@ -323,24 +365,17 @@ describe('swaddle', function () {
     })
 
     describe('request-promise', function () {
-      it('performs the request', function () {
+      it('performs the request, returns the json parsed body', function () {
         let client = swaddle(BASE_URL, {fn: requestPromise})
         return client.foo.get('bar').then((res) => {
-          assert.equal(res, body)
-        })
-      })
-
-      it('returnBody is ignored by default', function () {
-        let client = swaddle(BASE_URL, {fn: requestPromise, returnBody: true})
-        return client.foo.get('bar').then((res) => {
-          assert.equal(res, body)
-        })
-      })
-
-      it('json parses the body', function () {
-        let client = swaddle(BASE_URL, {fn: requestPromise, json: true})
-        return client.foo.get('bar').then((res) => {
           assert.deepEqual(res, parsedBody)
+        })
+      })
+
+      it('returns the raw body when json is false', function () {
+        let client = swaddle(BASE_URL, {fn: requestPromise, json: false})
+        return client.foo.get('bar').then((res) => {
+          assert.equal(res, body)
         })
       })
 
@@ -349,40 +384,31 @@ describe('swaddle', function () {
           .post('/foo', snakeCaseObj)
           .reply(200)
 
-        let client = swaddle(BASE_URL, {
-          json: true, returnBody: true, camelCase: true, fn: requestPromise
-        })
+        let client = swaddle(BASE_URL, {camelCase: true, fn: requestPromise})
 
         return client.foo.post({json: camelCaseObj})
       })
     })
 
     describe('got', function () {
-      it('performs the request', function () {
+      it('performs the request, returns the json parsed body', function () {
         let client = swaddle(BASE_URL, {fn: got})
         return client.foo.get('bar').then((res) => {
-          assert.equal(res.body, body)
+          assert.deepEqual(res, parsedBody)
         })
       })
 
-      it('returnBody returns the body', function () {
-        let client = swaddle(BASE_URL, {fn: got, returnBody: true})
+      it('returns the raw body when json is false', function () {
+        let client = swaddle(BASE_URL, {fn: got, json: false})
         return client.foo.get('bar').then((res) => {
           assert.equal(res, body)
         })
       })
 
-      it('json parses the body', function () {
-        let client = swaddle(BASE_URL, {fn: got, json: true})
+      it('returns the full response when returnBody is false', function () {
+        let client = swaddle(BASE_URL, {fn: got, returnBody: false})
         return client.foo.get('bar').then((res) => {
           assert.deepEqual(res.body, parsedBody)
-        })
-      })
-
-      it('json and returnBody returns the parsed body', function () {
-        let client = swaddle(BASE_URL, {fn: got, json: true, returnBody: true})
-        return client.foo.get('bar').then((res) => {
-          assert.deepEqual(res, parsedBody)
         })
       })
 
@@ -391,43 +417,32 @@ describe('swaddle', function () {
           .post('/foo', snakeCaseObj)
           .reply(200)
 
-        let client = swaddle(BASE_URL, {
-          json: true, returnBody: true, camelCase: true, fn: got
-        })
+        let client = swaddle(BASE_URL, {camelCase: true, fn: got})
 
         return client.foo.post({body: camelCaseObj})
       })
     })
 
     describe('fetch', function () {
-      it('performs the request', function () {
+      it('performs the request, returns the json parsed body', function () {
         let client = swaddle(BASE_URL, {fn: fetch})
         return client.foo.get('bar').then((res) => {
-          return res.text()
-        }).then((res) => {
-          assert.equal(res, body)
-        })
-      })
-
-      it('returnBody returns the body', function () {
-        let client = swaddle(BASE_URL, {fn: fetch, returnBody: true})
-        return client.foo.get('bar').then((res) => {
-          assert.equal(res, body)
-        })
-      })
-
-      it('json is ignored, still need to use res.json()', function () {
-        let client = swaddle(BASE_URL, {fn: fetch, json: true})
-        return client.foo.get('bar').then((res) => {
-          return res.json()
-        }).then((res) => {
           assert.deepEqual(res, parsedBody)
         })
       })
 
-      it('json and returnBody returns the parsed body', function () {
-        let client = swaddle(BASE_URL, {fn: fetch, json: true, returnBody: true})
+      it('returns the raw body when json is false', function () {
+        let client = swaddle(BASE_URL, {fn: fetch, json: false})
         return client.foo.get('bar').then((res) => {
+          assert.equal(res, body)
+        })
+      })
+
+      it('returns the full response when returnBody is false', function () {
+        let client = swaddle(BASE_URL, {fn: fetch, returnBody: false})
+        return client.foo.get('bar').then((res) => {
+          return res.json()
+        }).then((res) => {
           assert.deepEqual(res, parsedBody)
         })
       })
