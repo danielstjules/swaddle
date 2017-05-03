@@ -7,7 +7,7 @@
 
 Automagically create API clients/wrappers in JavaScript. This is a great
 alternative for when client libraries don't already exist, and they can't be
-easily generated from a swagger API.
+easily generated from a swagger API. How does it work? ES6 proxies!
 
 
 ``` javascript
