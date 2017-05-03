@@ -11,8 +11,8 @@ easily generated from a swagger API.
 
 
 ``` javascript
-let repos = await github.users('danielstjules').repos.get()
-// GET https://api.github.com/users/danielstjules/repos
+let repos = await github.users('octocat').repos.get()
+// GET https://api.github.com/users/octocat/repos
 ```
 
 [![Build Status](https://travis-ci.org/danielstjules/swaddle.svg?branch=master)](https://travis-ci.org/danielstjules/swaddle)
@@ -47,13 +47,17 @@ let github = swaddle('https://api.github.com', {
   camelCase: true // Create a camelCase client for a snake_case JSON API
 })
 
-github.users.get('danielstjules', (err, user) => {
-  // GET https://api.github.com/users/danielstjules
+github.users.get('octocat', (err, user) => {
+  // GET https://api.github.com/users/octocat
   user.publicRepos // camelCase option renames user.public_repos
 })
 
-github.users('danielstjules').repos.get((err, repos) => {
-  // GET https://api.github.com/users/danielstjules/repos
+github.users('octocat').repos.get((err, repos) => {
+  // GET https://api.github.com/users/octocat/repos
+})
+
+github.repos('octocat', 'Spoon-Knife').stargazers.get((err, stargazers) => {
+  // GET https://api.github.com/repos/octocat/Spoon-Knife/stargazers
 })
 
 github.search.repositories.get('?q=tetris', (err, repos) => {
@@ -61,9 +65,9 @@ github.search.repositories.get('?q=tetris', (err, repos) => {
 });
 
 // Identical operations, both perform
-// GET https://api.example.com/users/danielstjules
-github.users('danielstjules').get()
-github.users().get('danielstjules')
+// GET https://api.example.com/users/octocat
+github.users('octocat').get()
+github.users().get('octocat')
 ```
 
 The library is compatible with a range of HTTP request clients,
@@ -118,7 +122,7 @@ var github = swaddle('https://api.github.com', {
 });
 
 // Default to using fetch in the browser
-github.users('danielstjules').repos.get().then((repos) => {
+github.users('octocat').repos.get().then((repos) => {
   // repos
 });
 
