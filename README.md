@@ -19,8 +19,6 @@ let repos = await github.users('octocat').repos.get()
 
 * [Overview](#overview)
 * [Installation](#installation)
-* [Node support](#node-support)
-* [Browser support](#browser-support)
 * [Options](#options)
   * [aliases](#aliases)
   * [fn](#fn)
@@ -30,6 +28,8 @@ let repos = await github.users('octocat').repos.get()
   * [camelCase](#camelcase)
   * [extension](#extension)
   * [whitelist](#whitelist)
+* [Node support](#node-support)
+* [Browser support](#browser-support)
 
 ## Overview
 
@@ -95,39 +95,6 @@ let github = swaddle('https://api.github.com', {
 ``` bash
 npm install --save swaddle
 npm install request # optional
-```
-
-## Node support
-
-Requires Node 6.4.0+
-
-## Browser support
-
-The library makes use of Proxies, which means it works in Chrome 49+, FF 18+,
-Opera 36+, Safari 10+, and Edge. For older browsers, such as IE9+ and Safari 6+,
-three things are required:
-* Installing a polyfill like
-  [`proxy-polyfill`](https://github.com/GoogleChrome/proxy-polyfill)
-* Using browserify or webpack to load the module in your build
-* Enumerating available properties via `whitelist`
-
-This is because polyfills require that properties you want to proxy be known at
-creation time. In a browser with fetch, an example would then be:
-
-``` javascript
-var github = swaddle('https://api.github.com', {
-  whitelist: ['users', 'repos'],
-  returnBody: true,
-  json: true
-});
-
-// Default to using fetch in the browser
-github.users('octocat').repos.get().then((repos) => {
-  // repos
-});
-
-github.search
-// Error: search not listed in swaddle's whitelist
 ```
 
 ## Options
@@ -312,5 +279,38 @@ client.users().get((err, res) => {
 });
 
 client.search
+// Error: search not listed in swaddle's whitelist
+```
+
+## Node support
+
+Requires Node 6.4.0+
+
+## Browser support
+
+The library makes use of Proxies, which means it works in Chrome 49+, FF 18+,
+Opera 36+, Safari 10+, and Edge. For older browsers, such as IE9+ and Safari 6+,
+three things are required:
+* Installing a polyfill like
+  [`proxy-polyfill`](https://github.com/GoogleChrome/proxy-polyfill)
+* Using browserify or webpack to load the module in your build
+* Enumerating available properties via `whitelist`
+
+This is because polyfills require that properties you want to proxy be known at
+creation time. In a browser with fetch, an example would then be:
+
+``` javascript
+var github = swaddle('https://api.github.com', {
+  whitelist: ['users', 'repos'],
+  returnBody: true,
+  json: true
+});
+
+// Default to using fetch in the browser
+github.users('octocat').repos.get().then((repos) => {
+  // repos
+});
+
+github.search
 // Error: search not listed in swaddle's whitelist
 ```
