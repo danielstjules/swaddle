@@ -3,7 +3,7 @@ let nock = require('nock')
 let requestPromise = require('request-promise')
 let got = require('got')
 let fetch = require('node-fetch')
-let swaddle = require('.')
+let swaddle = require('../lib/')
 
 describe('swaddle', function () {
   let BASE_URL = 'http://api'
