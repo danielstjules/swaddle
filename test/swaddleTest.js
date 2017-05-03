@@ -235,6 +235,22 @@ describe('swaddle', function () {
           done()
         })
       })
+
+      it('does not modify the original object', function (done) {
+        nock(BASE_URL)
+          .post('/foo', snakeCaseObj)
+          .reply(200)
+
+        let client = swaddle(BASE_URL, {
+          json: true, returnBody: true, camelCase: true
+        })
+
+        client.foo.post({json: camelCaseObj}, (err, res) => {
+          if (err) return done(err)
+          assert(snakeCaseObj.foo_bar)
+          done()
+        })
+      })
     })
 
     describe('extension', function () {
