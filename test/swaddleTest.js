@@ -50,6 +50,11 @@ describe('swaddle', function () {
       assert.equal(url, 'http://api/foo')
     })
 
+    it('joins multiple arguments with /', function () {
+      let url = client('foo', 'bar')._url
+      assert.equal(url, 'http://api/foo/bar')
+    })
+
     it('returns a new Proxy for chaining', function () {
       let a = client.foo('bar')
       let b = client.foo('bar').baz('qux')
