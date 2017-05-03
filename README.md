@@ -5,7 +5,7 @@
   <br>
 </h1>
 
-Automagically generate API clients/wrappers in JavaScript. This is a great
+Automagically create API clients/wrappers in JavaScript. This is a great
 alternative for when client libraries don't already exist, and they can't be
 easily generated from a swagger API.
 
