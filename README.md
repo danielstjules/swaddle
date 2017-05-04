@@ -28,8 +28,7 @@ let repos = await github.users('octocat').repos.get()
   * [camelCase](#camelcase)
   * [extension](#extension)
   * [whitelist](#whitelist)
-* [Node support](#node-support)
-* [Browser support](#browser-support)
+* [Compatibility](#compatibility)
 
 ## Overview
 
@@ -287,18 +286,13 @@ client.search
 // Error: search not listed in swaddle's whitelist
 ```
 
-## Node support
+## Compatibility
 
-Requires Node 6.4.0+
-
-## Browser support
-
-The library makes use of Proxies, which means it works in Chrome 49+, FF 18+,
-Opera 36+, Safari 10+, and Edge. For older browsers, such as IE9+ and Safari 6+,
-three things are required:
+The library makes use of Proxies, which means it works with Node 6.4+,
+Chrome 49+, FF 18+, Opera 36+, Safari 10+, and Edge. For older versions of Node
+and browsers such as IE9+ and Safari 6+, two things are required:
 * Installing a polyfill like
   [`proxy-polyfill`](https://github.com/GoogleChrome/proxy-polyfill)
-* Using browserify or webpack to load the module in your build
 * Enumerating available properties via `whitelist`
 
 This is because polyfills require that properties you want to proxy be known at
@@ -317,3 +311,6 @@ github.users('octocat').repos.get().then((repos) => {
 github.search
 // Error: search not listed in swaddle's whitelist
 ```
+
+For browsers, it's assumed that you're using browserify, webpack, or similar,
+to load the module with your build.
