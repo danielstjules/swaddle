@@ -351,6 +351,13 @@ describe('swaddle', function () {
           client.foo(1).baz(2)
         }, Error)
       })
+
+      it('works with camelCase', function () {
+        swaddle(BASE_URL, {
+          camelCase: true,
+          whitelist: ['fooBar']
+        }).fooBar
+      })
     })
   })
 
