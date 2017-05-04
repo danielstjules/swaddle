@@ -356,7 +356,7 @@ describe('swaddle', function () {
         swaddle(BASE_URL, {
           camelCase: true,
           whitelist: ['fooBar']
-        }).fooBar
+        }).fooBar()
       })
     })
   })
