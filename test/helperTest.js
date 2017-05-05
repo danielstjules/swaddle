@@ -2,6 +2,13 @@ let Helper = require('../lib/helper')
 let assert = require('assert')
 
 describe('Helper', function () {
+  describe('removeTrailingSlash', function () {
+    it('removes trailing slash from string', function () {
+      let res = Helper.removeTrailingSlash('http://api/url/')
+      assert.equal(res, 'http://api/url')
+    })
+  })
+
   describe('convertToCamelCase', function () {
     it('converts keys to camelCase', function () {
       let res = Helper.convertToCamelCase({
