@@ -271,9 +271,12 @@ client.search.get('?q=foo', (err, res) => {
 
 Whitelists properties that can be accessed. Required when polyfilling Proxy
 support for older browsers. Note that the exception is thrown during the
-property access, and not during request execution. Default: empty
+property access, and not during request execution. Accepts arrays of strings
+for top level resources, or objects with nested objects and arrays for listing
+sub-resources. Default: empty
 
 ``` javascript
+// Single top level resource, /user
 var client = swaddle('https://api.example.com', {
   whitelist: ['users']
 });
@@ -284,6 +287,19 @@ client.users().get((err, res) => {
 
 client.search
 // Error: search not listed in swaddle's whitelist
+
+// Can provide a combination of objects & arrays for sub-resources
+// Example supports: /users, /tickets, /tickets/replies, /tickets/related
+client = swaddle(BASE_URL, {
+  whitelist: {
+    users: [],
+    tickets: ['replies', 'related'],
+  }
+})
+
+client.tickets(1).replies.get((err, replies) => {
+  // success
+})
 ```
 
 ## Compatibility

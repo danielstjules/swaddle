@@ -342,8 +342,37 @@ describe('swaddle', function () {
     describe('whitelist', function () {
       let client = swaddle(BASE_URL, {whitelist: ['foo', 'bar']})
 
-      it('allows properties in the whitelist', function () {
-        client.foo(1).bar(2)
+      it('allows properties in a whitelist array', function () {
+        client.foo(1)
+        client.bar(1)
+      })
+
+      it('allows properties in a whitelist object', function () {
+        let client = swaddle(BASE_URL, {
+          whitelist: {foo: [], bar: []}
+        })
+        client.foo(1)
+        client.bar(1)
+      })
+
+      it('allows nesting', function () {
+        let client = swaddle(BASE_URL, {
+          whitelist: {
+            users: {
+              repos: ['stargazers']
+            },
+            emojis: []
+          }
+        })
+
+        client.users(1).repos(2).stargazers(3)
+        client.emojis()
+      })
+
+      it('throws for properties not at correct level', function () {
+        assert.throws(() => {
+          client.foo(1).bar(2)
+        }, Error)
       })
 
       it('throws for properties not in the whitelist', function () {
