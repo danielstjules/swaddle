@@ -110,10 +110,8 @@ is during initialization:
 
 ``` javascript
 let client = swaddle('https://api.example.com', {
-  auth: {
-    user: 'username',
-    pass: 'password',
-    sendImmediately: false
+  headers: {
+    Authorization: 'Basic ' + Buffer.from('User:Pass').toString('base64')
   }
 })
 ```
@@ -125,7 +123,7 @@ request, both basic auth and the custom header would be set:
 ``` javascript
 client.search.get('?q=foo', {
   headers: {'x-custom-header': 'value'}
-}.then((res) => {
+}).then((res) => {
   // ...
 })
 ```
