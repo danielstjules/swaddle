@@ -47,46 +47,52 @@ a camelCase client for a snake_case JSON API.
 let swaddle = require('swaddle')
 let github = swaddle('https://api.github.com', {camelCase: true})
 
-github.users.get('octocat', (err, user) => {
-  // GET https://api.github.com/users/octocat
-  user.publicRepos // instead of user.public_repos
+// GET https://api.github.com/users/octocat
+let user = await github.users.get('octocat')
+user.publicRepos // instead of user.public_repos
+
+// Without async/await
+github.users.get('octocat').then((user) => {
+  // ...
 })
 
-github.users('octocat').repos.get((err, repos) => {
-  // GET https://api.github.com/users/octocat/repos
-})
+// GET https://api.github.com/users/octocat/repos
+let repos = await github.users('octocat').get()
 
-github.repos('octocat', 'Spoon-Knife').stargazers.get((err, stargazers) => {
-  // GET https://api.github.com/repos/octocat/Spoon-Knife/stargazers
-})
+// GET https://api.github.com/repos/octocat/Spoon-Knife/stargazers
+let stargazers = await github.repos('octocat', 'Spoon-Knife').stargazers.get()
 
-github.search.repositories.get('?q=tetris', (err, repos) => {
-  // GET https://api.github.com/search/repositories?q=tetris
-});
+// GET https://api.github.com/search/repositories?q=tetris
+let results = await github.search.repositories.get('?q=tetris')
 
 // Identical operations, both perform
 // GET https://api.example.com/users/octocat
-github.users('octocat').get()
-github.users().get('octocat')
+await github.users('octocat').get()
+await github.users().get('octocat')
 ```
 
 The library is compatible with a range of HTTP request clients,
 including:
+[`got`](https://github.com/sindresorhus/got),
 [`request`](https://github.com/request/request),
 [`request-promise`](https://github.com/request-promise),
-[`got`](https://github.com/sindresorhus/got),
 [`whatwg-fetch`](https://github.com/github/fetch), and
 [`node-fetch`](https://github.com/bitinn/node-fetch).
 
 None are installed as a dependency, giving you the freedom to pick your
-favorite. Unless provided, it will default to trying to require `request`,
-`got`, or the browser's `fetch`, in that order.
+favorite. Unless provided, it will default to trying to require `got`,
+`request-promise`, `request`, or the browser's `fetch`, in that order.
 
 ``` javascript
 let swaddle = require('swaddle')
-let got = require('got')
+let request = require('request')
 let github = swaddle('https://api.github.com', {
-  fn: got // Use `got` to perform requests
+  fn: request // Use `request` to perform requests
+})
+
+github.users('octocat').repos.get((err, repos) => {
+  // GET https://api.github.com/users/octocat/repos
+  // request uses callbacks instead of promises
 })
 ```
 
@@ -94,7 +100,7 @@ let github = swaddle('https://api.github.com', {
 
 ``` bash
 npm install --save swaddle
-npm install request # optional
+npm install got # optional
 ```
 
 ## Options
@@ -119,7 +125,7 @@ request, both basic auth and the custom header would be set:
 ``` javascript
 client.search.get('?q=foo', {
   headers: {'x-custom-header': 'value'}
-}, (err, res) => {
+}.then((res) => {
   // ...
 })
 ```
@@ -135,10 +141,9 @@ Creates aliases for the supplied HTTP methods. Default: none
 let swaddle = require('swaddle')
 let client = swaddle('https://api.example.com', {
   aliases: {create: 'post', destroy: 'delete'}
-  json: true
 })
 
-client.threads.create({body: {subject: 'hi'}}, (err, res) => {
+client.threads.create({body: {subject: 'hi'}}).then((res) => {
   // POST https://api.example.com/threads
   // body: '{"subject": "hi"}'
 })
@@ -147,7 +152,7 @@ client.threads.create({body: {subject: 'hi'}}, (err, res) => {
 ### fn
 
 The request function to use. Unless provided, it will default to requiring
-`request`, `got`, or the browser's `fetch`, in that order.
+`got`, `request-promise`, `request`, or the browser's `fetch`, in that order.
 
 ``` javascript
 let swaddle = require('swaddle')
@@ -165,12 +170,12 @@ Returns the response body instead of response object. Default: true
 let swaddle = require('swaddle')
 
 let client = swaddle('https://api.example.com')
-client.users.get((err, res) => {
+client.users.get().then((res) => {
   // Don't need to access res.body
 })
 
 client = swaddle('https://api.example.com', {returnBody: false})
-client.users.get((err, res) => {
+client.users.get().then((err) => {
   // Need to access res.body
 })
 ```
@@ -192,7 +197,7 @@ let client = swaddle('https://api.example.com', {
 // Don't need to write:
 // client.messages.post({body: 'foo'})
 
-client.messages.create('foo', (err, res) => {
+client.messages.create('foo').then((res) => {
   // POST https://api.example.com/messages
   // body: "foo"
 })
@@ -207,12 +212,12 @@ Parses the JSON response. This is built into some libraries, but not all
 let swaddle = require('swaddle')
 
 let client = swaddle('https://api.example.com')
-client.users.get((err, res) => {
+client.users.get().then((res) => {
   // res.body has been parsed
 })
 
 client = swaddle('https://api.example.com', {json: false})
-client.users.get((err, res) => {
+client.users.get().then((res) => {
   // res.body is a string response
 })
 ```
@@ -232,16 +237,18 @@ client.jobStatuses.get((err, res) => {
   // GET http://api/job_statuses
 })
 
-client.fooBar('bazQux').get((err, res) => {
+client.fooBar('bazQux').get().then((res) => {
   // GET http://api/foo_bar/bazQux
 })
 
-client.users(1).get((err, res) => {
+client.users(1).get().then((res) => {
   // If the original response body was '{"is_admin": false}', then res is
   // {isAdmin: false}
 })
 
-client.users.post({body: {isAdmin: false, name: 'Foo Bar'}}, (err, res) => {
+client.users.post({
+  body: {isAdmin: false, name: 'Foo Bar'}
+}).then((res) => {
   // POST http://api/users
   // body: '{"is_admin": false, "name": "Foo Bar"}'
 })
@@ -258,11 +265,11 @@ let client = swaddle('https://api.example.com', {
   extension: 'json'
 })
 
-client.users(1).get((err, res) => {
+client.users(1).get().then((res) => {
   // https://api.example.com/users/1.json
 })
 
-client.search.get('?q=foo', (err, res) => {
+client.search.get('?q=foo').then((res) => {
   // https://api.example.com/search.json?q=foo
 })
 ```
@@ -281,7 +288,7 @@ var client = swaddle('https://api.example.com', {
   whitelist: ['users']
 });
 
-client.users().get((err, res) => {
+client.users().get().then((res) => {
   // success
 });
 
@@ -297,7 +304,7 @@ client = swaddle(BASE_URL, {
   }
 })
 
-client.tickets(1).replies.get((err, replies) => {
+client.tickets(1).replies.get().then((replies) => {
   // success
 })
 ```
