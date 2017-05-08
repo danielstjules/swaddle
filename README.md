@@ -321,7 +321,7 @@ creation time. In a browser with fetch, an example would then be:
 
 ``` javascript
 var github = swaddle('https://api.github.com', {
-  whitelist: ['users', 'repos']
+  whitelist: {users: ['repos']}
 });
 
 // Default to using fetch in the browser
