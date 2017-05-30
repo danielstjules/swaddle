@@ -75,6 +75,25 @@ describe('swaddle', function () {
         return client.foo[method]()
       })
     })
+
+    it('append to the URL', function() {
+      nock(BASE_URL)
+        .get('/users/foo')
+        .reply(200)
+
+      let client = swaddle(BASE_URL)
+      return client.users.get('foo')
+    })
+
+    it('does not append trailing slash with query strings', function() {
+      nock(BASE_URL)
+        .get('/search')
+        .query({q: 'foo'})
+        .reply(200)
+
+      let client = swaddle(BASE_URL)
+      return client.search.get('?q=foo')
+    })
   })
 
   describe('options', function () {
