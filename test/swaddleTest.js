@@ -76,7 +76,7 @@ describe('swaddle', function () {
       })
     })
 
-    it('append to the URL', function() {
+    it('append to the URL', function () {
       nock(BASE_URL)
         .get('/users/foo')
         .reply(200)
@@ -85,7 +85,7 @@ describe('swaddle', function () {
       return client.users.get('foo')
     })
 
-    it('does not append trailing slash with query strings', function() {
+    it('does not append trailing slash with query strings', function () {
       nock(BASE_URL)
         .get('/search')
         .query({q: 'foo'})
