@@ -199,12 +199,13 @@ describe('swaddle', function () {
 
     describe('sendAsBody', function () {
       it('nests the post data in the req.body', function () {
+        let body = {foo: 'bar'}
         nock(BASE_URL)
-          .post('/foo', '"bar"')
+          .post('/foo', JSON.stringify(body))
           .reply(200)
 
         let client = swaddle(BASE_URL, {sendAsBody: true})
-        return client.foo.post('bar')
+        return client.foo.post(body)
       })
     })
 

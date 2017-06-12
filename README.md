@@ -309,6 +309,17 @@ client.tickets(1).replies.get().then((replies) => {
 
 ## Compatibility
 
+The module has been tested and is compatible with the following module
+versions:
+
+| package                                               | version  |
+| ----------------------------------------------------- | --------:|
+[`got`](https://github.com/sindresorhus/got)            | ^7       |
+[`request`](https://github.com/request/request)         | ^2.81.0  |
+[`request-promise`](https://github.com/request-promise) | ^4.2.0   |
+[`whatwg-fetch`](https://github.com/github/fetch)       | ^2.03    |
+[`node-fetch`](https://github.com/bitinn/node-fetch)    | ^1.6.3   |
+
 The library makes use of Proxies, which means it works with Node 6.4+,
 Chrome 49+, FF 18+, Opera 36+, Safari 10+, and Edge. For older versions of Node
 and browsers such as IE9+ and Safari 6+, two things are required:
